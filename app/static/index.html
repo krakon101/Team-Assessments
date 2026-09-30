@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDABIP Authentication Demo</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="navbar">
+            <div class="brand">
+                <span class="brand-badge">EDABIP</span>
+                <span class="brand-title">Identity & Access</span>
+            </div>
+            <div class="nav-links">
+                <a href="/docs" target="_blank" class="nav-btn">Swagger API Docs</a>
+            </div>
+        </header>
+
+        <!-- Main Card Container -->
+        <main class="auth-card-wrapper">
+            <!-- Step Flow Tracker -->
+            <div class="stepper">
+                <div class="step-item active" id="step-node-1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Signup</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step-item" id="step-node-2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Verify OTP</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step-item" id="step-node-3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Login</span>
+                </div>
+            </div>
+
+            <!-- Global Alert Banner -->
+            <div id="alert-banner" class="alert-banner hidden"></div>
+
+            <!-- 1. SIGNUP SCREEN -->
+            <div id="view-signup" class="view-section">
+                <div class="card-header">
+                    <h2>Create your account</h2>
+                    <p class="subtitle">Enter your personal details to get started with EDABIP.</p>
+                </div>
+                <form id="signup-form" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">First Name <span class="required">*</span></label>
+                            <input type="text" id="first_name" name="first_name" placeholder="John" autocomplete="given-name">
+                            <div class="field-error" id="error-first_name"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="last_name">Last Name <span class="required">*</span></label>
+                            <input type="text" id="last_name" name="last_name" placeholder="Doe" autocomplete="family-name">
+                            <div class="field-error" id="error-last_name"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Work / Personal Email <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" placeholder="john.doe@example.com" autocomplete="email">
+                        <div class="field-error" id="error-email"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password <span class="required">*</span></label>
+                        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password">
+                        <div class="password-hint">Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special character.</div>
+                        <div class="field-error" id="error-password"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" autocomplete="new-password">
+                        <div class="field-error" id="error-confirm_password"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btn-signup">Create Account</button>
+                    <div class="switch-link">
+                        Already have an account? <a href="#" id="link-to-login">Log In</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 2. OTP VERIFICATION SCREEN -->
+            <div id="view-otp" class="view-section hidden">
+                <div class="card-header">
+                    <h2>Verify Your Email</h2>
+                    <p class="subtitle">We've sent a 6-digit verification code to <strong id="otp-target-email"></strong>.</p>
+                </div>
+                <div class="console-hint-box">
+                    <span>💡 <strong>Local Dev Note:</strong> Check your server terminal/console to copy the generated OTP code!</span>
+                </div>
+                <form id="otp-form" novalidate>
+                    <div class="form-group">
+                        <label for="otp">Enter 6-Digit OTP <span class="required">*</span></label>
+                        <input type="text" id="otp" name="otp" maxlength="6" class="otp-input" placeholder="000000" autocomplete="one-time-code">
+                        <div class="field-error" id="error-otp"></div>
+                    </div>
+
+                    <div class="otp-actions">
+                        <button type="submit" class="btn btn-primary" id="btn-verify">Verify Email</button>
+                    </div>
+
+                    <div class="resend-container">
+                        <p>Didn't receive the email?</p>
+                        <button type="button" class="btn btn-secondary" id="btn-resend">Resend OTP</button>
+                        <div id="resend-timer-text" class="timer-text hidden"></div>
+                    </div>
+
+                    <div class="switch-link">
+                        <a href="#" id="link-back-signup">← Back to Signup</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 3. LOGIN SCREEN -->
+            <div id="view-login" class="view-section hidden">
+                <div class="card-header">
+                    <h2>Sign in to EDABIP</h2>
+                    <p class="subtitle">Enter your verified email and password to access your dashboard.</p>
+                </div>
+                <form id="login-form" novalidate>
+                    <div class="form-group">
+                        <label for="login-email">Email <span class="required">*</span></label>
+                        <input type="email" id="login-email" name="email" placeholder="john.doe@example.com" autocomplete="username">
+                        <div class="field-error" id="error-login-email"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Password <span class="required">*</span></label>
+                        <input type="password" id="login-password" name="password" placeholder="••••••••" autocomplete="current-password">
+                        <div class="field-error" id="error-login-password"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="btn-login">Sign In</button>
+
+                    <div class="switch-link">
+                        Need an account? <a href="#" id="link-to-signup">Create one here</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 4. DASHBOARD SCREEN (Logged In) -->
+            <div id="view-dashboard" class="view-section hidden">
+                <div class="card-header success-header">
+                    <div class="success-icon">✓</div>
+                    <h2>Welcome to EDABIP!</h2>
+                    <p class="subtitle">You have successfully registered, verified your email, and logged in.</p>
+                </div>
+                <div class="profile-card">
+                    <div class="profile-row">
+                        <span class="profile-label">User ID:</span>
+                        <span class="profile-value" id="dash-user-id"></span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Full Name:</span>
+                        <span class="profile-value" id="dash-user-name"></span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Email:</span>
+                        <span class="profile-value" id="dash-user-email"></span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Email Status:</span>
+                        <span class="badge badge-success">Verified</span>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary full-width" id="btn-logout">Sign Out</button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>EDABIP Backend Assessment • Python FastAPI + SQLAlchemy + Pydantic v2 + Bcrypt</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
